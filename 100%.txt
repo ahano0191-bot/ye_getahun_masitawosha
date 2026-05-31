@@ -1,0 +1,304 @@
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+void main() => runApp(const MaterialApp(debugShowCheckedModeBanner: false, home: WelcomePage()));
+
+// --- Welcome Page ---
+class WelcomePage extends StatelessWidget {
+  const WelcomePage({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF001F3F),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent, elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings, color: Colors.white, size: 30),
+            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsPage())),
+          ),
+        ],
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text("Welcome", style: TextStyle(color: Colors.white, fontSize: 30, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 50),
+            _styledButton(context, "Login in", const LoginPage()),
+            const SizedBox(height: 15),
+            _styledButton(context, "Create account", const RegisterPage()),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _styledButton(BuildContext context, String text, Widget page) {
+    return SizedBox(
+      width: 280, height: 60,
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(backgroundColor: Colors.blue[600], foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30))),
+        onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => page)),
+        child: Text(text, style: const TextStyle(fontSize: 18)),
+      ),
+    );
+  }
+}
+
+// --- Settings Page ---
+class SettingsPage extends StatelessWidget {
+  const SettingsPage({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF001F3F),
+      appBar: AppBar(
+        title: const Text("Settings / ቅንብሮች", style: TextStyle(color: Colors.white)), 
+        backgroundColor: const Color(0xFF001F3F),
+        leading: IconButton(icon: const Icon(Icons.arrow_back, color: Colors.white), onPressed: () => Navigator.pop(context)),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          children: [
+            const Text("ስለ ፕሮግራሙ / About", style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 20),
+            const Text("ይህ መተግበሪያ ወጪዎችዎን ለመቆጣጠር ይረዳል።\nThis app helps you track your expenses.", 
+                textAlign: TextAlign.center, style: TextStyle(color: Colors.white70, fontSize: 16)),
+            const Divider(color: Colors.white, height: 40),
+            const Text("የተሰራው በ: Addisu Hano\nCreated by: Addisu Hano", textAlign: TextAlign.center, style: TextStyle(color: Colors.white, fontSize: 18)),
+            const SizedBox(height: 10),
+            const Text("ስልክ: +251916465792", style: TextStyle(color: Colors.white, fontSize: 18)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// --- Login Page ---
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  final TextEditingController _userController = TextEditingController();
+  final TextEditingController _passController = TextEditingController();
+
+  void _login(BuildContext context) {
+    if (_userController.text == "GETA4261" && _passController.text == "GECHI") {
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const DashboardPage()));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("የተጠቃሚ ስም ወይም የይለፍ ቃል ስህተት ነው!")));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF001F3F),
+      appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0, leading: IconButton(icon: const Icon(Icons.arrow_back, color: Colors.white), onPressed: () => Navigator.pop(context))),
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text("Welcome back", style: TextStyle(color: Colors.white, fontSize: 30)),
+            const SizedBox(height: 20),
+            TextField(controller: _userController, decoration: const InputDecoration(filled: true, fillColor: Colors.white, hintText: "User name", border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(30))))),
+            const SizedBox(height: 10),
+            TextField(controller: _passController, obscureText: true, decoration: const InputDecoration(filled: true, fillColor: Colors.white, hintText: "Password", border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(30))))),
+            const SizedBox(height: 20),
+            SizedBox(width: double.infinity, height: 50, child: ElevatedButton(onPressed: () => _login(context), child: const Text("Login in"))),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// --- DashboardPage ---
+class DashboardPage extends StatelessWidget {
+  const DashboardPage({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF001F3F),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF001F3F), 
+        title: const Text("የወጪ መቆጣጠሪያ", style: TextStyle(color: Colors.white)),
+        leading: Container(),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _menuButton(context, "ዕለታዊ ወጪዎች", const ExpensePage(type: "ዕለታዊ")),
+            const SizedBox(height: 20),
+            _menuButton(context, "ወርሃዊ ወጪዎች", const ExpensePage(type: "ወርሃዊ")),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _menuButton(BuildContext context, String text, Widget page) {
+    return SizedBox(
+      width: 280, height: 60,
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(backgroundColor: Colors.blue[600], shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30))),
+        onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => page)),
+        child: Text(text, style: const TextStyle(fontSize: 18, color: Colors.white)),
+      ),
+    );
+  }
+}
+
+// --- ExpensePage ---
+class ExpensePage extends StatefulWidget {
+  final String type;
+  const ExpensePage({super.key, required this.type});
+  @override
+  State<ExpensePage> createState() => _ExpensePageState();
+}
+
+class _ExpensePageState extends State<ExpensePage> {
+  String _selectedMonth = 'መስከረም';
+  String _selectedDay = '1';
+  final List<String> months = ['መስከረም', 'ጥቅምት', 'ህዳር', 'ታህሳስ', 'ጥር', 'የካቲት', 'መጋቢት', 'ሚያዝያ', 'ግንቦት', 'ሰኔ', 'ሐምሌ', 'ነሐሴ'];
+  final List<String> days = List.generate(30, (i) => (i + 1).toString());
+  final List<String> dailyItems = ["ምግብ", "ሻይ/ቡና", "ሌሎች"];
+  final List<String> monthlyItems = ["የወር አስበዛ", "መብራት", "ውሃ", "ቁጠባ", "የትምህርት ቤት ክፍያ", "ትራንስፖርት", "ኢንተርኔት/ስልክ", "ሌሎች"];
+  
+  final Map<String, TextEditingController> _controllers = {};
+  double _total = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _initControllers();
+    _loadData();
+  }
+
+  void _initControllers() {
+    List<String> list = widget.type == "ዕለታዊ" ? dailyItems : monthlyItems;
+    _controllers.clear();
+    for (var i in list) _controllers[i] = TextEditingController();
+  }
+
+  String get _storageKey => "${widget.type}_${_selectedMonth}_${_selectedDay}";
+
+  Future<void> _loadData() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      for (var entry in _controllers.entries) {
+        entry.value.text = prefs.getString("${_storageKey}_${entry.key}") ?? "";
+      }
+      _calc();
+    });
+  }
+
+  Future<void> _saveData() async {
+    final prefs = await SharedPreferences.getInstance();
+    for (var entry in _controllers.entries) {
+      await prefs.setString("${_storageKey}_${entry.key}", entry.value.text);
+    }
+  }
+
+  void _calc() {
+    double sum = 0.0;
+    _controllers.forEach((k, c) => sum += double.tryParse(c.text) ?? 0.0);
+    setState(() => _total = sum);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    List<String> list = widget.type == "ዕለታዊ" ? dailyItems : monthlyItems;
+    return Scaffold(
+      backgroundColor: const Color(0xFFE3F2FD),
+      appBar: AppBar(
+        title: Text("${widget.type} መመዝገቢያ", style: const TextStyle(color: Colors.white)), 
+        backgroundColor: const Color(0xFF001F3F),
+        leading: IconButton(icon: const Icon(Icons.arrow_back, color: Colors.white), onPressed: () => Navigator.pop(context)),
+      ),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(15.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _buildDropdown(_selectedMonth, months, (val) => setState(() { _selectedMonth = val!; _loadData(); })),
+                if (widget.type == "ዕለታዊ")
+                  _buildDropdown(_selectedDay, days, (val) => setState(() { _selectedDay = val!; _loadData(); })),
+              ],
+            ),
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: list.length,
+              itemBuilder: (context, i) => Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                child: TextField(
+                  controller: _controllers[list[i]],
+                  keyboardType: TextInputType.number,
+                  onChanged: (v) { _calc(); _saveData(); },
+                  decoration: InputDecoration(
+                    labelText: list[i], filled: true, fillColor: Colors.white,
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Container(padding: const EdgeInsets.all(20), child: Text("ጠቅላላ: $_total ብር", style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF001F3F)))),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDropdown(String value, List<String> items, Function(String?) onChanged) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(15)),
+      child: DropdownButton<String>(
+        value: value, underline: const SizedBox(),
+        items: items.map((m) => DropdownMenuItem(value: m, child: Text(m))).toList(),
+        onChanged: onChanged,
+      ),
+    );
+  }
+}
+
+// --- RegisterPage ---
+class RegisterPage extends StatelessWidget {
+  const RegisterPage({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF001F3F),
+      appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0, leading: IconButton(icon: const Icon(Icons.arrow_back, color: Colors.white), onPressed: () => Navigator.pop(context))),
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text("Register", style: TextStyle(color: Colors.white, fontSize: 30)),
+            const SizedBox(height: 20),
+            _buildField("User name"), _buildField("Email"), _buildField("Password"), 
+            _buildField("Confirm password"), _buildField("Mobile"),
+            const SizedBox(height: 20),
+            SizedBox(width: double.infinity, height: 50, child: ElevatedButton(onPressed: () {}, child: const Text("Register"))),
+          ],
+        ),
+      ),
+    );
+  }
+  Widget _buildField(String hint) => Padding(
+    padding: const EdgeInsets.symmetric(vertical: 5),
+    child: TextField(decoration: InputDecoration(filled: true, fillColor: Colors.white, hintText: hint, border: OutlineInputBorder(borderRadius: BorderRadius.circular(30)))),
+  );
+}
